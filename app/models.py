@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -11,6 +11,8 @@ class Usuario(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     nombre: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
+    rol: Mapped[str] = mapped_column(String(20), default="usuario", nullable=False)
+    activo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     temas: Mapped[list["Tema"]] = relationship(back_populates="usuario")
     registros_reto: Mapped[list["RegistroReto"]] = relationship(back_populates="usuario")

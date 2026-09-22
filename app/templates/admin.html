@@ -1,0 +1,132 @@
+{% extends "layout.html" %}
+
+{% block title %}Refugio de Paz — Panel Admin{% endblock %}
+
+{% block content %}
+<h1 class="titulo-poster text-4xl md:text-5xl font-bold mb-2">PANEL ADMIN</h1>
+<p class="text-gray-400 mb-10">Gestiona usuarios y temas del muro.</p>
+
+<section class="mb-14">
+    <h2 class="titulo-poster text-2xl font-bold mb-4">USUARIOS</h2>
+    <div class="bg-refugio-card border border-white/10 rounded-xl overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-gray-400 border-b border-white/10">
+                    <th class="px-4 py-3 font-medium">Nombre</th>
+                    <th class="px-4 py-3 font-medium">Rol</th>
+                    <th class="px-4 py-3 font-medium">Estado</th>
+                    <th class="px-4 py-3 font-medium">Temas</th>
+                    <th class="px-4 py-3 font-medium text-right">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in usuarios %}
+                <tr class="border-b border-white/5 last:border-0">
+                    <td class="px-4 py-3">{{ u.nombre }}</td>
+                    <td class="px-4 py-3">
+                        <span
+                            class="text-xs uppercase tracking-wide px-2 py-1 rounded-full {% if u.rol == 'admin' %}bg-refugio-accent2/20 text-refugio-accent2{% else %}bg-white/5 text-gray-400{% endif %}"
+                        >
+                            {{ u.rol }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">
+                        {% if u.activo %}
+                        <span class="text-xs px-2 py-1 rounded-full bg-refugio-accent2/20 text-refugio-accent2">Activo</span>
+                        {% else %}
+                        <span class="text-xs px-2 py-1 rounded-full bg-red-500/20 text-red-400">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3 text-gray-400">{{ u.temas|length }}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex flex-wrap justify-end gap-2">
+                            {% if u.id != usuario.id %}
+                                {% if u.activo %}
+                                <form action="/admin/usuarios/{{ u.id }}/desactivar" method="post">
+                                    <button class="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition">
+                                        Desactivar
+                                    </button>
+                                </form>
+                                {% else %}
+                                <form action="/admin/usuarios/{{ u.id }}/activar" method="post">
+                                    <button class="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition">
+                                        Activar
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                {% if u.rol == 'admin' %}
+                                <form action="/admin/usuarios/{{ u.id }}/degradar" method="post">
+                                    <button class="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition">
+                                        Quitar admin
+                                    </button>
+                                </form>
+                                {% else %}
+                                <form action="/admin/usuarios/{{ u.id }}/promover" method="post">
+                                    <button class="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition">
+                                        Hacer admin
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                <form
+                                    action="/admin/usuarios/{{ u.id }}/eliminar"
+                                    method="post"
+                                    onsubmit="return confirm('¿Eliminar este usuario y todos sus temas? Esta acción no se puede deshacer.');"
+                                >
+                                    <button class="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span class="text-xs text-gray-600">Tú</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section>
+    <h2 class="titulo-poster text-2xl font-bold mb-4">TEMAS</h2>
+    {% if temas %}
+    <div class="bg-refugio-card border border-white/10 rounded-xl overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-gray-400 border-b border-white/10">
+                    <th class="px-4 py-3 font-medium">Título</th>
+                    <th class="px-4 py-3 font-medium">Autor</th>
+                    <th class="px-4 py-3 font-medium">Fecha</th>
+                    <th class="px-4 py-3 font-medium text-right">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tema in temas %}
+                <tr class="border-b border-white/5 last:border-0">
+                    <td class="px-4 py-3">{{ tema.titulo }}</td>
+                    <td class="px-4 py-3 text-refugio-accent2">{{ tema.usuario.nombre }}</td>
+                    <td class="px-4 py-3 text-gray-500">{{ tema.fecha_creacion.strftime("%d/%m/%Y") }}</td>
+                    <td class="px-4 py-3 text-right">
+                        <form
+                            action="/admin/temas/{{ tema.id }}/eliminar"
+                            method="post"
+                            onsubmit="return confirm('¿Eliminar este tema? Esta acción no se puede deshacer.');"
+                        >
+                            <button class="text-xs px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition">
+                                Eliminar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-gray-500">Todavía no hay temas propuestos.</p>
+    {% endif %}
+</section>
+{% endblock %}
