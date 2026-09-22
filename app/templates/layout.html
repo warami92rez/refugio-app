@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Refugio App{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet"
+    />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poster: ["Oswald", "sans-serif"],
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    colors: {
+                        refugio: {
+                            bg: "#0b0d10",
+                            card: "#15181c",
+                            accent: "#ff5a1f",
+                            accent2: "#3ddc97",
+                        },
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        .titulo-poster {
+            font-family: "Oswald", sans-serif;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="bg-refugio-bg text-gray-100 font-sans min-h-screen flex flex-col">
+    {% if usuario %}
+    <header class="border-b border-white/10 bg-refugio-card/60 sticky top-0 backdrop-blur">
+        <nav class="max-w-5xl mx-auto flex items-center justify-between px-6 py-4">
+            <a href="/dashboard" class="titulo-poster text-2xl font-bold text-refugio-accent">
+                REFUGIO
+            </a>
+            <div class="flex items-center gap-6 text-sm font-medium">
+                <a href="/dashboard" class="hover:text-refugio-accent transition">Inicio</a>
+                <a href="/muro" class="hover:text-refugio-accent transition">Muro de Temas</a>
+                <form action="/logout" method="post">
+                    <button type="submit" class="text-gray-400 hover:text-white transition">
+                        Salir
+                    </button>
+                </form>
+            </div>
+        </nav>
+    </header>
+    {% endif %}
+
+    <main class="flex-1 max-w-5xl mx-auto w-full px-6 py-10">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="text-center text-xs text-gray-500 py-6">
+        Refugio App &mdash; MVP Fase 1
+    </footer>
+</body>
+</html>

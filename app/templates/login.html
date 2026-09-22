@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}Refugio App — Ingresar{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center">
+    <div class="w-full max-w-md">
+        <h1 class="titulo-poster text-6xl font-bold text-center leading-none mb-2">
+            REFUGIO
+        </h1>
+        <p class="text-center text-refugio-accent titulo-poster text-lg mb-10 tracking-widest">
+            TU ESPACIO PARA APRENDER
+        </p>
+
+        <div class="bg-refugio-card border border-white/10 rounded-xl p-8 shadow-2xl">
+            {% if error %}
+            <p class="text-red-400 text-sm mb-4">{{ error }}</p>
+            {% endif %}
+
+            <form action="/login" method="post" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2" for="nombre">
+                        ¿Cómo te llamas?
+                    </label>
+                    <input
+                        type="text"
+                        id="nombre"
+                        name="nombre"
+                        required
+                        placeholder="Tu nombre"
+                        class="w-full rounded-lg bg-black/40 border border-white/10 px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-refugio-accent"
+                    />
+                </div>
+                <button
+                    type="submit"
+                    class="w-full titulo-poster text-lg font-semibold bg-refugio-accent hover:bg-orange-600 transition rounded-lg py-3"
+                >
+                    Entrar
+                </button>
+            </form>
+            <p class="text-xs text-gray-500 mt-4 text-center">
+                Si es tu primera vez, se crea tu cuenta automáticamente.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

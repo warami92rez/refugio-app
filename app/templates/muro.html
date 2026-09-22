@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block title %}Refugio App — Muro de Temas{% endblock %}
+
+{% block content %}
+<h1 class="titulo-poster text-4xl md:text-5xl font-bold mb-2">MURO DE TEMAS</h1>
+<p class="text-gray-400 mb-10">¿Qué te gustaría que te enseñaran?</p>
+
+<form
+    action="/muro"
+    method="post"
+    class="bg-refugio-card border border-white/10 rounded-xl p-6 flex flex-col sm:flex-row gap-4 mb-12"
+>
+    <input
+        type="text"
+        name="titulo"
+        required
+        placeholder="Propón un tema..."
+        class="flex-1 rounded-lg bg-black/40 border border-white/10 px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-refugio-accent"
+    />
+    <button
+        type="submit"
+        class="titulo-poster font-semibold bg-refugio-accent hover:bg-orange-600 transition rounded-lg px-6 py-3 whitespace-nowrap"
+    >
+        Proponer
+    </button>
+</form>
+
+{% if temas %}
+<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    {% for tema in temas %}
+    <div class="bg-refugio-card border border-white/10 rounded-xl p-6 hover:border-refugio-accent2 transition">
+        <h3 class="titulo-poster text-xl font-bold leading-snug">{{ tema.titulo }}</h3>
+        <p class="text-xs text-gray-500 mt-4">
+            Propuesto por <span class="text-refugio-accent2">{{ tema.usuario.nombre }}</span>
+        </p>
+        <p class="text-xs text-gray-600">
+            {{ tema.fecha_creacion.strftime("%d/%m/%Y") }}
+        </p>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-gray-500 text-center py-16">
+    Todavía no hay temas propuestos. ¡Sé el primero!
+</p>
+{% endif %}
+{% endblock %}
