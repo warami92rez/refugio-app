@@ -1,11 +1,17 @@
 {% extends "layout.html" %}
 
-{% block title %}Refugio App — Muro de Temas{% endblock %}
+{% block title %}Refugio de Paz — Muro de Temas{% endblock %}
 
 {% block content %}
 <h1 class="titulo-poster text-4xl md:text-5xl font-bold mb-2">MURO DE TEMAS</h1>
-<p class="text-gray-400 mb-10">¿Qué te gustaría que te enseñaran?</p>
+<p class="text-gray-400 mb-2">¿Qué te gustaría que te enseñaran?</p>
+<p class="text-xs text-gray-500 mb-10">Has propuesto {{ mis_temas }}/2 temas.</p>
 
+{% if error %}
+<p class="text-red-400 text-sm mb-4">{{ error }}</p>
+{% endif %}
+
+{% if mis_temas < 2 %}
 <form
     action="/muro"
     method="post"
@@ -25,6 +31,11 @@
         Proponer
     </button>
 </form>
+{% else %}
+<p class="text-gray-500 text-sm mb-12 bg-refugio-card border border-white/10 rounded-xl p-4">
+    Ya alcanzaste el límite de 2 temas propuestos. Pide a un administrador que elimine uno si quieres proponer otro.
+</p>
+{% endif %}
 
 {% if temas %}
 <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

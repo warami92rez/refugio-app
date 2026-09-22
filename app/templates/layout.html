@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}Refugio App{% endblock %}</title>
+    <title>{% block title %}Refugio de Paz{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600&display=swap"
@@ -42,11 +42,19 @@
     <header class="border-b border-white/10 bg-refugio-card/60 sticky top-0 backdrop-blur">
         <nav class="max-w-5xl mx-auto flex items-center justify-between px-6 py-4">
             <a href="/dashboard" class="titulo-poster text-2xl font-bold text-refugio-accent">
-                REFUGIO
+                REFUGIO DE PAZ
             </a>
             <div class="flex items-center gap-6 text-sm font-medium">
                 <a href="/dashboard" class="hover:text-refugio-accent transition">Inicio</a>
                 <a href="/muro" class="hover:text-refugio-accent transition">Muro de Temas</a>
+                {% if usuario.rol == "admin" %}
+                <a href="/admin" class="hover:text-refugio-accent2 transition">Panel Admin</a>
+                {% endif %}
+                <span
+                    class="text-xs uppercase tracking-wide px-2 py-1 rounded-full {% if usuario.rol == 'admin' %}bg-refugio-accent2/20 text-refugio-accent2{% else %}bg-white/5 text-gray-400{% endif %}"
+                >
+                    {{ usuario.rol }}
+                </span>
                 <form action="/logout" method="post">
                     <button type="submit" class="text-gray-400 hover:text-white transition">
                         Salir
@@ -62,7 +70,7 @@
     </main>
 
     <footer class="text-center text-xs text-gray-500 py-6">
-        Refugio App &mdash; MVP Fase 1
+        Refugio de Paz &mdash; MVP Fase 1
     </footer>
 </body>
 </html>
