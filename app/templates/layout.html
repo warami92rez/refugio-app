@@ -39,30 +39,74 @@
 </head>
 <body class="bg-refugio-bg text-gray-100 font-sans min-h-screen flex flex-col">
     {% if usuario %}
+    {% set rol_badge_clases = "text-xs uppercase tracking-wide px-2 py-1 rounded-full " ~ ("bg-refugio-accent2/20 text-refugio-accent2" if usuario.rol == "admin" else "bg-white/5 text-gray-400") %}
     <header class="border-b border-white/10 bg-refugio-card/60 sticky top-0 backdrop-blur">
         <nav class="max-w-5xl mx-auto flex items-center justify-between px-6 py-4">
             <a href="/dashboard" class="titulo-poster text-2xl font-bold text-refugio-accent">
                 REFUGIO DE PAZ
             </a>
-            <div class="flex items-center gap-6 text-sm font-medium">
+
+            <div class="hidden sm:flex items-center gap-6 text-sm font-medium">
                 <a href="/dashboard" class="hover:text-refugio-accent transition">Inicio</a>
                 <a href="/muro" class="hover:text-refugio-accent transition">Muro de Temas</a>
                 {% if usuario.rol == "admin" %}
                 <a href="/admin" class="hover:text-refugio-accent2 transition">Panel Admin</a>
                 {% endif %}
-                <span
-                    class="text-xs uppercase tracking-wide px-2 py-1 rounded-full {% if usuario.rol == 'admin' %}bg-refugio-accent2/20 text-refugio-accent2{% else %}bg-white/5 text-gray-400{% endif %}"
-                >
-                    {{ usuario.rol }}
-                </span>
+                <span class="{{ rol_badge_clases }}">{{ usuario.rol }}</span>
                 <form action="/logout" method="post">
                     <button type="submit" class="text-gray-400 hover:text-white transition">
                         Salir
                     </button>
                 </form>
             </div>
+
+            <button
+                type="button"
+                id="menu-toggle"
+                class="sm:hidden p-2 -mr-2 text-gray-300 hover:text-white"
+                aria-label="Abrir menu"
+                aria-expanded="false"
+                aria-controls="menu-movil"
+            >
+                <svg id="menu-icon-abrir" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <svg id="menu-icon-cerrar" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
         </nav>
+
+        <div id="menu-movil" class="hidden sm:hidden border-t border-white/10 px-6 py-4 space-y-4 text-sm font-medium">
+            <a href="/dashboard" class="block hover:text-refugio-accent transition">Inicio</a>
+            <a href="/muro" class="block hover:text-refugio-accent transition">Muro de Temas</a>
+            {% if usuario.rol == "admin" %}
+            <a href="/admin" class="block hover:text-refugio-accent2 transition">Panel Admin</a>
+            {% endif %}
+            <span class="{{ rol_badge_clases }} inline-block">{{ usuario.rol }}</span>
+            <form action="/logout" method="post">
+                <button type="submit" class="block text-gray-400 hover:text-white transition">
+                    Salir
+                </button>
+            </form>
+        </div>
     </header>
+    <script>
+        (function () {
+            var toggle = document.getElementById("menu-toggle");
+            var menu = document.getElementById("menu-movil");
+            var iconoAbrir = document.getElementById("menu-icon-abrir");
+            var iconoCerrar = document.getElementById("menu-icon-cerrar");
+            if (!toggle || !menu) return;
+            toggle.addEventListener("click", function () {
+                var abierto = !menu.classList.contains("hidden");
+                menu.classList.toggle("hidden");
+                iconoAbrir.classList.toggle("hidden");
+                iconoCerrar.classList.toggle("hidden");
+                toggle.setAttribute("aria-expanded", String(!abierto));
+            });
+        })();
+    </script>
     {% endif %}
 
     <main class="flex-1 max-w-5xl mx-auto w-full px-6 py-10">
