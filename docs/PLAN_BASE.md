@@ -8,14 +8,25 @@ funciones (calendario, reto semanal, votos, etc.). Nada de la Fase 2 entra en es
 Cada etapa termina en uno o varios commits propios y se puede revisar por separado.
 Marca cada casilla cuando esté hecha y verificada.
 
-## Decisiones propuestas (confirmar antes de la Etapa 2)
+## Decisiones tomadas
 
-| Tema | Propuesta | Alternativa |
-| --- | --- | --- |
-| Cómo se entra | Nombre + contraseña (mínimo 8 caracteres), hash con argon2 | PIN numérico de 6 dígitos (más cómodo, menos seguro) |
-| Quién puede registrarse | Solo con **código de invitación** del grupo (`INVITE_CODE`) | Registro abierto con aprobación de un admin |
-| Usuarios que ya existen | Quedan sin contraseña y un admin les asigna una clave temporal | Que cada uno cree su clave en el primer login (permite que otra persona la cree antes) |
-| Primer admin | `ADMIN_NAMES` solo se aplica al **crear** la cuenta con el código de invitación | Promoverlo a mano en la base de datos |
+| Tema | Decisión |
+| --- | --- |
+| Cómo se entra | **Nombre de usuario + contraseña** (mínimo 8 caracteres, hash con argon2). Sin PIN. |
+| Quién puede registrarse | Cualquier persona que complete el formulario de registro. Sin código de invitación ni aprobación previa. |
+| Formulario de registro | Nombre, edad, nombre de usuario, sede a la que asiste. Se suman contraseña y confirmación, porque sin ellas no hay ingreso con contraseña. |
+| Primer admin | Ya no puede depender de un nombre en `ADMIN_NAMES`: con registro abierto, quien registre ese usuario primero sería admin. Se crea con un comando (`python -m app.cli crear-admin`) ejecutado una vez en Railway. |
+| Usuarios que ya existen | Conservan su cuenta con el nombre actual como usuario, quedan sin contraseña y un admin les asigna una clave temporal que deben cambiar al entrar. |
+
+## Decisiones propuestas (se pueden cambiar)
+
+| Tema | Propuesta |
+| --- | --- |
+| Sede | Lista desplegable administrada desde el panel admin (tabla `sedes`), no texto libre. Así se pueden contar y filtrar. **Necesito los nombres de las sedes.** |
+| Edad | Número entero entre 10 y 99, definido en una constante fácil de cambiar. |
+| Nombre de usuario | De 3 a 30 caracteres: letras, números, punto y guion bajo. Se guarda en minúsculas y es único sin distinguir mayúsculas. |
+| Quién ve la edad y la sede | Solo los administradores. El muro muestra el nombre, nunca el usuario, la edad ni la sede. |
+| Protección contra registros masivos | Límite de registros por IP, campo trampa oculto y, si hace falta, captcha. |
 
 ## Etapa 0: cimientos (antes de tocar la lógica)
 
@@ -34,11 +45,15 @@ Marca cada casilla cuando esté hecha y verificada.
 
 ## Etapa 2: autenticación real
 
-- [ ] Modelo: columnas `password_hash` y `nombre_normalizado` (minúsculas, sin espacios extra, único). Migración con Alembic.
-- [ ] Registro con código de invitación (`INVITE_CODE`) y contraseña con hash argon2.
-- [ ] Login con nombre + contraseña. Mensaje de error genérico (no revelar si el nombre existe).
-- [ ] `ADMIN_NAMES` deja de promover en cada login. Solo aplica al crear la cuenta.
-- [ ] Admin puede restablecer la contraseña de un usuario (clave temporal que se cambia al entrar).
+- [ ] Modelo `Usuario`: `nombre` (para mostrar), `username` (único, normalizado), `edad`, `sede_id` y `password_hash`. Migración con Alembic que conserva a los usuarios actuales.
+- [ ] Modelo `Sede` y gestión de sedes desde el panel admin (crear, renombrar, desactivar).
+- [ ] Formulario `/registro`: nombre, edad, usuario, sede, contraseña y confirmación. Validaciones en servidor y mensajes claros por campo.
+- [ ] Protección del registro abierto: límite por IP, campo trampa oculto y aviso sobre qué datos se guardan y quién los ve.
+- [ ] Login con usuario + contraseña. Mensaje de error genérico (no revelar si el usuario existe).
+- [ ] Se elimina `ADMIN_NAMES` y el login que crea cuentas. El primer admin se crea con `python -m app.cli crear-admin`.
+- [ ] Usuarios existentes: el admin les asigna una clave temporal y la app los obliga a cambiarla al entrar.
+- [ ] Admin puede restablecer la contraseña de cualquier usuario (clave temporal que se cambia al entrar).
+- [ ] El panel admin muestra edad y sede de cada usuario.
 - [ ] Pantalla para que cada usuario cambie su propia contraseña.
 - [ ] Límite de intentos fallidos por nombre y por IP, con bloqueo temporal.
 - [ ] Token CSRF en todos los formularios POST.
@@ -79,7 +94,7 @@ Mejoras:
 ## Etapa 5: cierre
 
 - [ ] `README.md`: qué es, cómo correrlo en local, variables de entorno, cómo correr pruebas y migraciones, cómo compilar el CSS.
-- [ ] `.env.example` actualizado (`SECRET_KEY`, `INVITE_CODE`, `ADMIN_NAMES`, `ENV`).
+- [ ] `.env.example` actualizado (`SECRET_KEY`, `ENV`; se quita `ADMIN_NAMES`).
 - [ ] Lista de cambios de despliegue para Railway: variables nuevas, ejecutar `alembic upgrade head`, asignar claves a los usuarios existentes.
 - [ ] Revisión final del diff buscando fallos de seguridad y regresiones.
 
@@ -89,8 +104,9 @@ Mejoras:
 | --- | --- |
 | `SECRET_KEY` | Obligatoria en producción |
 | `ENV` | `production` activa cookies `https_only` y validaciones estrictas |
-| `INVITE_CODE` | Código que el grupo comparte para registrarse |
-| `ADMIN_NAMES` | Nombres que se vuelven admin al crear la cuenta |
+| `DATABASE_URL` | Sin cambios |
+
+Se elimina `ADMIN_NAMES`.
 
 ## Fuera de alcance
 
