@@ -97,6 +97,14 @@ Mejoras:
 - [ ] Lista de cambios de despliegue para Railway: variables nuevas, ejecutar `alembic upgrade head`, asignar claves a los usuarios existentes.
 - [ ] Revisión final del diff buscando fallos de seguridad y regresiones.
 
+## Antes de fusionar la Etapa 1 a `main`
+
+La Etapa 1 hace que la app no arranque sin `SECRET_KEY`. Si Railway despliega `main` automáticamente, el orden importa:
+
+1. En Railway, servicio de la app, pestaña *Variables*: agregar `SECRET_KEY` con una clave generada con `python -c "import secrets; print(secrets.token_urlsafe(48))"`. No definir `ENV`.
+2. Recién después fusionar el PR de la Etapa 1.
+3. Verificar que el despliegue arrancó y que se puede iniciar sesión (todos tendrán que volver a entrar una vez).
+
 ## Variables de entorno nuevas
 
 | Variable | Para qué |
