@@ -8,7 +8,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.database import Base, engine, get_db, sync_schema
+from app.database import get_db
 from app.models import Tema, Usuario
 
 MAX_TEMAS_POR_USUARIO = 2
@@ -24,12 +24,6 @@ app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "refugi
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 templates = Jinja2Templates(directory="app/templates")
-
-
-@app.on_event("startup")
-def on_startup():
-    Base.metadata.create_all(bind=engine)
-    sync_schema(engine)
 
 
 def get_usuario_actual(request: Request, db: Session) -> Usuario | None:
