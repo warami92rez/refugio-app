@@ -45,15 +45,15 @@ Marca cada casilla cuando esté hecha y verificada.
 
 ## Etapa 2: autenticación real
 
-- [ ] Modelo `Usuario`: `nombre` (para mostrar), `username` (único, normalizado), `edad`, `sede` (texto) y `password_hash`. Migración con Alembic que conserva a los usuarios actuales.
-- [ ] Formulario `/registro`: nombre, edad, usuario, sede, contraseña y confirmación. Validaciones en servidor y mensajes claros por campo.
-- [ ] Protección del registro abierto: límite por IP, campo trampa oculto y aviso sobre qué datos se guardan y quién los ve.
-- [ ] Login con usuario + contraseña. Mensaje de error genérico (no revelar si el usuario existe).
-- [ ] Se elimina `ADMIN_NAMES` y el login que crea cuentas. El primer admin se crea con `python -m app.cli crear-admin`.
-- [ ] Usuarios existentes: el admin les asigna una clave temporal y la app los obliga a cambiarla al entrar.
-- [ ] Admin puede restablecer la contraseña de cualquier usuario (clave temporal que se cambia al entrar).
-- [ ] El panel admin muestra edad y sede de cada usuario.
-- [ ] Pantalla para que cada usuario cambie su propia contraseña.
+- [x] Modelo `Usuario`: `nombre` (para mostrar), `username` (único, normalizado), `edad`, `sede` (texto) y `password_hash`. Migración con Alembic que conserva a los usuarios actuales.
+- [x] Formulario `/registro`: nombre, edad, usuario, sede, contraseña y confirmación. Validaciones en servidor y mensajes claros por campo.
+- [x] Protección del registro abierto, parte 1: campo trampa oculto y aviso sobre qué datos se guardan y quién los ve. *(El límite por IP va en la 2b.)*
+- [x] Login con usuario + contraseña. Mensaje de error genérico (no revelar si el usuario existe).
+- [x] Se elimina `ADMIN_NAMES` y el login que crea cuentas. El primer admin se crea con `python -m app.cli crear-admin` o, sin terminal, con las variables `BOOTSTRAP_ADMIN_USERNAME` y `BOOTSTRAP_ADMIN_PASSWORD` (el `Procfile` ejecuta `bootstrap-admin` en cada arranque y solo actúa si todavía no hay ningún admin con contraseña).
+- [x] Usuarios existentes: el admin les asigna una clave temporal y la app los obliga a cambiarla al entrar.
+- [x] Admin puede restablecer la contraseña de cualquier usuario (clave temporal que se muestra una sola vez y se cambia al entrar).
+- [x] El panel admin muestra edad y sede de cada usuario.
+- [x] Pantalla para que cada usuario cambie su propia contraseña.
 - [ ] Límite de intentos fallidos por nombre y por IP, con bloqueo temporal.
 - [ ] Token CSRF en todos los formularios POST.
 - [ ] Reglas de admin: nadie puede quitar o eliminar al último admin, y un admin no se degrada ni se elimina a sí mismo.
@@ -105,6 +105,16 @@ La Etapa 1 hace que la app no arranque sin `SECRET_KEY`. Si Railway despliega `m
 2. Recién después fusionar el PR de la Etapa 1.
 3. Verificar que el despliegue arrancó y que se puede iniciar sesión (todos tendrán que volver a entrar una vez).
 
+## Antes de fusionar la Etapa 2a a `main`
+
+Al desplegar, **nadie podrá entrar** hasta que exista un admin con contraseña: las cuentas actuales no tienen. Orden:
+
+1. En Railway, servicio de la app, *Variables*: agregar `BOOTSTRAP_ADMIN_USERNAME` (el usuario del dueño; para la cuenta actual "William" será `william`) y `BOOTSTRAP_ADMIN_PASSWORD` (mínimo 8 caracteres).
+2. Fusionar el PR. El despliegue migra la base y deja al dueño como admin con esa contraseña.
+3. Entrar, ir a *Contraseña* y cambiarla por una propia.
+4. **Borrar las variables `BOOTSTRAP_ADMIN_*` de Railway.**
+5. Desde el panel admin, *Restablecer clave* a cada usuario que ya existía y pasarle la clave temporal por un medio privado. Cada uno la cambia al entrar.
+
 ## Variables de entorno nuevas
 
 | Variable | Para qué |
@@ -112,6 +122,7 @@ La Etapa 1 hace que la app no arranque sin `SECRET_KEY`. Si Railway despliega `m
 | `SECRET_KEY` | Obligatoria en producción |
 | `ENV` | Solo para local: `development` relaja las validaciones. En producción no se define |
 | `DATABASE_URL` | Sin cambios |
+| `BOOTSTRAP_ADMIN_USERNAME`, `BOOTSTRAP_ADMIN_PASSWORD`, `BOOTSTRAP_ADMIN_NOMBRE` | Solo para crear el primer admin al desplegar la Etapa 2; borrar después |
 
 Se elimina `ADMIN_NAMES`.
 

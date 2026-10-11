@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% from "_campos.html" import campo %}
 
 {% block title %}Refugio de Paz — Ingresar{% endblock %}
 
@@ -11,23 +12,13 @@
 
         <div class="bg-refugio-card border border-white/10 rounded-xl p-8 shadow-2xl">
             {% if error %}
-            <p class="text-red-400 text-sm mb-4">{{ error }}</p>
+            <p class="text-red-400 text-sm mb-4" role="alert">{{ error }}</p>
             {% endif %}
 
             <form action="/login" method="post" class="space-y-5">
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2" for="nombre">
-                        ¿Cómo te llamas?
-                    </label>
-                    <input
-                        type="text"
-                        id="nombre"
-                        name="nombre"
-                        required
-                        placeholder="Tu nombre"
-                        class="w-full rounded-lg bg-black/40 border border-white/10 px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-refugio-accent"
-                    />
-                </div>
+                {{ campo("Usuario", "username", valor=username, autocomplete="username",
+                         attrs={"placeholder": "tu.usuario", "autocapitalize": "none", "spellcheck": "false"}) }}
+                {{ campo("Contraseña", "password", tipo="password", autocomplete="current-password") }}
                 <button
                     type="submit"
                     class="w-full titulo-poster text-lg font-semibold text-refugio-bg bg-refugio-accent hover:bg-cyan-600 hover:text-white transition rounded-lg py-3"
@@ -35,8 +26,12 @@
                     Entrar
                 </button>
             </form>
-            <p class="text-xs text-gray-500 mt-4 text-center">
-                Si es tu primera vez, se crea tu cuenta automáticamente.
+            <p class="text-sm text-gray-400 mt-6 text-center">
+                ¿Primera vez?
+                <a href="/registro" class="text-refugio-accent hover:underline">Crea tu cuenta</a>
+            </p>
+            <p class="text-xs text-gray-500 mt-2 text-center">
+                Si ya tenías cuenta y no tienes contraseña, pídele una clave temporal a un administrador.
             </p>
         </div>
     </div>

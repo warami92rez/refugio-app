@@ -6,6 +6,18 @@
 <h1 class="titulo-poster text-4xl md:text-5xl font-bold mb-2">PANEL ADMIN</h1>
 <p class="text-gray-400 mb-10">Gestiona usuarios y temas del muro.</p>
 
+{% if clave_temporal %}
+<div class="mb-10 bg-refugio-card border border-refugio-accent/40 rounded-xl p-6" role="status">
+    <p class="text-sm text-gray-300">
+        Clave temporal para <strong>{{ usuario_clave.nombre }}</strong> (@{{ usuario_clave.username }}):
+    </p>
+    <p class="titulo-poster text-4xl font-bold text-refugio-accent my-3 select-all">{{ clave_temporal }}</p>
+    <p class="text-xs text-gray-500">
+        Compártela por un medio privado. Se muestra una sola vez y esa persona deberá cambiarla al entrar.
+    </p>
+</div>
+{% endif %}
+
 <section class="mb-14">
     <h2 class="titulo-poster text-2xl font-bold mb-4">USUARIOS</h2>
     <div class="bg-refugio-card border border-white/10 rounded-xl overflow-x-auto">
@@ -13,6 +25,8 @@
             <thead>
                 <tr class="text-left text-gray-400 border-b border-white/10">
                     <th class="px-4 py-3 font-medium">Nombre</th>
+                    <th class="px-4 py-3 font-medium">Edad</th>
+                    <th class="px-4 py-3 font-medium">Sede</th>
                     <th class="px-4 py-3 font-medium">Rol</th>
                     <th class="px-4 py-3 font-medium">Estado</th>
                     <th class="px-4 py-3 font-medium">Temas</th>
@@ -22,7 +36,12 @@
             <tbody>
                 {% for u in usuarios %}
                 <tr class="border-b border-white/5 last:border-0">
-                    <td class="px-4 py-3">{{ u.nombre }}</td>
+                    <td class="px-4 py-3">
+                        {{ u.nombre }}
+                        <span class="block text-xs text-gray-500">@{{ u.username }}</span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-400">{{ u.edad if u.edad is not none else "—" }}</td>
+                    <td class="px-4 py-3 text-gray-400">{{ u.sede or "—" }}</td>
                     <td class="px-4 py-3">
                         <span
                             class="text-xs uppercase tracking-wide px-2 py-1 rounded-full {% if u.rol == 'admin' %}bg-refugio-accent2/20 text-refugio-accent2{% else %}bg-white/5 text-gray-400{% endif %}"
@@ -35,6 +54,11 @@
                         <span class="text-xs px-2 py-1 rounded-full bg-refugio-accent2/20 text-refugio-accent2">Activo</span>
                         {% else %}
                         <span class="text-xs px-2 py-1 rounded-full bg-red-500/20 text-red-400">Inactivo</span>
+                        {% endif %}
+                        {% if not u.password_hash %}
+                        <span class="block mt-1 text-xs text-amber-300">Sin contraseña</span>
+                        {% elif u.debe_cambiar_password %}
+                        <span class="block mt-1 text-xs text-amber-300">Clave temporal</span>
                         {% endif %}
                     </td>
                     <td class="px-4 py-3 text-gray-400">{{ u.temas|length }}</td>
@@ -54,6 +78,16 @@
                                     </button>
                                 </form>
                                 {% endif %}
+
+                                <form
+                                    action="/admin/usuarios/{{ u.id }}/restablecer-password"
+                                    method="post"
+                                    onsubmit="return confirm('¿Generar una clave temporal para este usuario? Su contraseña actual dejará de funcionar.');"
+                                >
+                                    <button class="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition">
+                                        Restablecer clave
+                                    </button>
+                                </form>
 
                                 {% if u.rol == 'admin' %}
                                 <form action="/admin/usuarios/{{ u.id }}/degradar" method="post">

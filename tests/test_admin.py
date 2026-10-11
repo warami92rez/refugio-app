@@ -6,7 +6,7 @@ from app.models import Tema, Usuario
 
 @pytest.fixture
 def admin(login):
-    return login("Directora")
+    return login("Directora", rol="admin")
 
 
 def usuario(db, nombre):

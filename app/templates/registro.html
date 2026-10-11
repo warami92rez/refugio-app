@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% from "_campos.html" import campo %}
+
+{% block title %}Refugio de Paz — Crear cuenta{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center py-6">
+    <div class="w-full max-w-md">
+        <h1 class="titulo-poster text-4xl sm:text-5xl font-bold text-center leading-none mb-8">
+            CREA TU CUENTA
+        </h1>
+
+        <div class="bg-refugio-card border border-white/10 rounded-xl p-8 shadow-2xl">
+            <form action="/registro" method="post" class="space-y-5" novalidate>
+                {{ campo("Nombre", "nombre", valor=valores.nombre, error=errores.nombre, autocomplete="name",
+                         attrs={"maxlength": 80, "placeholder": "Como quieres que te vean en el muro"}) }}
+                {{ campo("Edad", "edad", tipo="text", valor=valores.edad, error=errores.edad,
+                         attrs={"inputmode": "numeric", "maxlength": 2, "placeholder": "Entre 10 y 99"}) }}
+                {{ campo("Nombre de usuario", "username", valor=valores.username, error=errores.username, autocomplete="username",
+                         ayuda="Es con el que entrarás. Letras sin tilde, números, punto o guion bajo.",
+                         attrs={"maxlength": 30, "autocapitalize": "none", "spellcheck": "false"}) }}
+                {{ campo("Sede a la que asistes", "sede", valor=valores.sede, error=errores.sede,
+                         attrs={"maxlength": 80, "list": "sedes-sugeridas", "autocomplete": "off"}) }}
+                {% if sedes %}
+                <datalist id="sedes-sugeridas">
+                    {% for sede in sedes %}<option value="{{ sede }}"></option>{% endfor %}
+                </datalist>
+                {% endif %}
+                {{ campo("Contraseña", "password", tipo="password", error=errores.password, autocomplete="new-password",
+                         ayuda="Mínimo 8 caracteres.", attrs={"maxlength": 128}) }}
+                {{ campo("Repite la contraseña", "password2", tipo="password", error=errores.password2, autocomplete="new-password",
+                         attrs={"maxlength": 128}) }}
+
+                <div class="sr-only" aria-hidden="true">
+                    <label for="sitio_web">No llenes este campo</label>
+                    <input type="text" id="sitio_web" name="sitio_web" tabindex="-1" autocomplete="off" />
+                </div>
+
+                <button
+                    type="submit"
+                    class="w-full titulo-poster text-lg font-semibold text-refugio-bg bg-refugio-accent hover:bg-cyan-600 hover:text-white transition rounded-lg py-3"
+                >
+                    Crear cuenta
+                </button>
+            </form>
+            <p class="text-xs text-gray-500 mt-5">
+                Guardamos tu nombre, edad y sede. Tu edad y tu sede solo las ven los administradores del grupo;
+                en el muro solo aparece tu nombre.
+            </p>
+            <p class="text-sm text-gray-400 mt-4 text-center">
+                ¿Ya tienes cuenta?
+                <a href="/login" class="text-refugio-accent hover:underline">Ingresa</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

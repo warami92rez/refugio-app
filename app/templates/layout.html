@@ -52,6 +52,7 @@
                 {% if usuario.rol == "admin" %}
                 <a href="/admin" class="hover:text-refugio-accent2 transition">Panel Admin</a>
                 {% endif %}
+                <a href="/cambiar-password" class="text-gray-400 hover:text-white transition">Contraseña</a>
                 <span class="{{ rol_badge_clases }}">{{ usuario.rol }}</span>
                 <form action="/logout" method="post">
                     <button type="submit" class="text-gray-400 hover:text-white transition">
@@ -83,6 +84,7 @@
             {% if usuario.rol == "admin" %}
             <a href="/admin" class="block hover:text-refugio-accent2 transition">Panel Admin</a>
             {% endif %}
+            <a href="/cambiar-password" class="block text-gray-400 hover:text-white transition">Cambiar contraseña</a>
             <span class="{{ rol_badge_clases }} inline-block">{{ usuario.rol }}</span>
             <form action="/logout" method="post">
                 <button type="submit" class="block text-gray-400 hover:text-white transition">

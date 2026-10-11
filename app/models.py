@@ -10,7 +10,12 @@ class Usuario(Base):
     __tablename__ = "usuarios"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    nombre: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
+    nombre: Mapped[str] = mapped_column(String(80), nullable=False)
+    username: Mapped[str] = mapped_column(String(30), unique=True, nullable=False)
+    edad: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    sede: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    debe_cambiar_password: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     rol: Mapped[str] = mapped_column(String(20), default="usuario", nullable=False)
     activo: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
