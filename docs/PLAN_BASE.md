@@ -14,6 +14,7 @@ Marca cada casilla cuando esté hecha y verificada.
 | --- | --- |
 | Cómo se entra | **Nombre de usuario + contraseña** (mínimo 8 caracteres, hash con argon2). Sin PIN. |
 | Quién puede registrarse | Cualquier persona que complete el formulario de registro. Sin código de invitación ni aprobación previa. |
+| Edad | Número entero entre 10 y 99 (confirmado), definido en una constante fácil de cambiar. |
 | Formulario de registro | Nombre, edad, nombre de usuario, sede a la que asiste. Se suman contraseña y confirmación, porque sin ellas no hay ingreso con contraseña. |
 | Primer admin | Ya no puede depender de un nombre en `ADMIN_NAMES`: con registro abierto, quien registre ese usuario primero sería admin. Se crea con un comando (`python -m app.cli crear-admin`) ejecutado una vez en Railway. |
 | Usuarios que ya existen | Conservan su cuenta con el nombre actual como usuario, quedan sin contraseña y un admin les asigna una clave temporal que deben cambiar al entrar. |
@@ -22,8 +23,7 @@ Marca cada casilla cuando esté hecha y verificada.
 
 | Tema | Propuesta |
 | --- | --- |
-| Sede | Lista desplegable administrada desde el panel admin (tabla `sedes`), no texto libre. Así se pueden contar y filtrar. **Necesito los nombres de las sedes.** |
-| Edad | Número entero entre 10 y 99, definido en una constante fácil de cambiar. |
+| Sede | Campo de texto abierto (hasta 80 caracteres), sin lista fija. El formulario sugiere las sedes que ya escribieron otras personas para reducir variaciones de ortografía. |
 | Nombre de usuario | De 3 a 30 caracteres: letras, números, punto y guion bajo. Se guarda en minúsculas y es único sin distinguir mayúsculas. |
 | Quién ve la edad y la sede | Solo los administradores. El muro muestra el nombre, nunca el usuario, la edad ni la sede. |
 | Protección contra registros masivos | Límite de registros por IP, campo trampa oculto y, si hace falta, captcha. |
@@ -45,8 +45,7 @@ Marca cada casilla cuando esté hecha y verificada.
 
 ## Etapa 2: autenticación real
 
-- [ ] Modelo `Usuario`: `nombre` (para mostrar), `username` (único, normalizado), `edad`, `sede_id` y `password_hash`. Migración con Alembic que conserva a los usuarios actuales.
-- [ ] Modelo `Sede` y gestión de sedes desde el panel admin (crear, renombrar, desactivar).
+- [ ] Modelo `Usuario`: `nombre` (para mostrar), `username` (único, normalizado), `edad`, `sede` (texto) y `password_hash`. Migración con Alembic que conserva a los usuarios actuales.
 - [ ] Formulario `/registro`: nombre, edad, usuario, sede, contraseña y confirmación. Validaciones en servidor y mensajes claros por campo.
 - [ ] Protección del registro abierto: límite por IP, campo trampa oculto y aviso sobre qué datos se guardan y quién los ve.
 - [ ] Login con usuario + contraseña. Mensaje de error genérico (no revelar si el usuario existe).
