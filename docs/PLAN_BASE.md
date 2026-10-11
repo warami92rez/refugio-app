@@ -38,10 +38,10 @@ Marca cada casilla cuando esté hecha y verificada.
 
 ## Etapa 1: arreglos de seguridad rápidos
 
-- [ ] `SECRET_KEY` obligatoria: la app no arranca en producción si falta o si es la de desarrollo.
-- [ ] Cookie de sesión con `https_only` en producción, `same_site="lax"` y `max_age` explícito.
-- [ ] Bucle de redirecciones: si el usuario de la sesión ya no existe, limpiar la sesión (`get_usuario_actual`) y que `/` y `/login` no dependan solo de la presencia de la cookie.
-- [ ] Cabeceras de seguridad: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`.
+- [x] `SECRET_KEY` obligatoria: la app no arranca si falta, mide menos de 32 caracteres o es un valor de ejemplo. El modo estricto es el predeterminado; `ENV=development` lo relaja solo en local (`app/config.py`).
+- [x] Cookie de sesión con `https_only` fuera de desarrollo, `same_site="lax"` y `max_age` de 14 días.
+- [x] Bucle de redirecciones: si el usuario de la sesión ya no existe, se limpia la sesión (`get_usuario_actual`) y `/` y `/login` ya no dependen solo de la presencia de la cookie.
+- [x] Cabeceras de seguridad: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security` (1 año, solo fuera de desarrollo) y `Cache-Control: no-store` en las páginas con sesión. `Content-Security-Policy` queda para la Etapa 4.
 
 ## Etapa 2: autenticación real
 
@@ -97,12 +97,20 @@ Mejoras:
 - [ ] Lista de cambios de despliegue para Railway: variables nuevas, ejecutar `alembic upgrade head`, asignar claves a los usuarios existentes.
 - [ ] Revisión final del diff buscando fallos de seguridad y regresiones.
 
+## Antes de fusionar la Etapa 1 a `main`
+
+La Etapa 1 hace que la app no arranque sin `SECRET_KEY`. Si Railway despliega `main` automáticamente, el orden importa:
+
+1. En Railway, servicio de la app, pestaña *Variables*: agregar `SECRET_KEY` con una clave generada con `python -c "import secrets; print(secrets.token_urlsafe(48))"`. No definir `ENV`.
+2. Recién después fusionar el PR de la Etapa 1.
+3. Verificar que el despliegue arrancó y que se puede iniciar sesión (todos tendrán que volver a entrar una vez).
+
 ## Variables de entorno nuevas
 
 | Variable | Para qué |
 | --- | --- |
 | `SECRET_KEY` | Obligatoria en producción |
-| `ENV` | `production` activa cookies `https_only` y validaciones estrictas |
+| `ENV` | Solo para local: `development` relaja las validaciones. En producción no se define |
 | `DATABASE_URL` | Sin cambios |
 
 Se elimina `ADMIN_NAMES`.

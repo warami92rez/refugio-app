@@ -6,6 +6,7 @@ os.environ["DATABASE_URL"] = os.getenv(
     "TEST_DATABASE_URL",
     "postgresql+psycopg2://postgres:postgres@localhost:5432/refugio_test",
 )
+os.environ["ENV"] = "test"
 os.environ["SECRET_KEY"] = "clave-solo-para-pruebas"
 os.environ["ADMIN_NAMES"] = "Directora"
 

@@ -8,6 +8,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 
+from app.config import ES_DESARROLLO, HSTS_MAX_AGE, SECRET_KEY, SESSION_MAX_AGE
 from app.database import get_db
 from app.models import Tema, Usuario
 
@@ -20,10 +21,36 @@ ADMIN_NAMES = {
 }
 
 app = FastAPI(title="Refugio de Paz")
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "refugio-dev-secret"))
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SECRET_KEY,
+    max_age=SESSION_MAX_AGE,
+    same_site="lax",
+    https_only=not ES_DESARROLLO,
+)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 templates = Jinja2Templates(directory="app/templates")
+
+CABECERAS_DE_SEGURIDAD = {
+    "X-Frame-Options": "DENY",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+}
+if not ES_DESARROLLO:
+    CABECERAS_DE_SEGURIDAD["Strict-Transport-Security"] = f"max-age={HSTS_MAX_AGE}"
+
+
+@app.middleware("http")
+async def agregar_cabeceras_de_seguridad(request: Request, call_next):
+    response = await call_next(request)
+    for nombre, valor in CABECERAS_DE_SEGURIDAD.items():
+        response.headers[nombre] = valor
+    if not request.url.path.startswith("/static"):
+        # Las paginas dependen de la sesion: que el navegador no las guarde.
+        response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 def get_usuario_actual(request: Request, db: Session) -> Usuario | None:
@@ -31,7 +58,8 @@ def get_usuario_actual(request: Request, db: Session) -> Usuario | None:
     if not usuario_id:
         return None
     usuario = db.get(Usuario, usuario_id)
-    if usuario is not None and not usuario.activo:
+    if usuario is None or not usuario.activo:
+        # La sesion apunta a alguien que ya no existe o fue desactivado.
         request.session.clear()
         return None
     return usuario
@@ -51,15 +79,15 @@ def contar_temas_usuario(db: Session, usuario_id: int) -> int:
 
 
 @app.get("/")
-def index(request: Request):
-    if request.session.get("usuario_id"):
+def index(request: Request, db: Session = Depends(get_db)):
+    if get_usuario_actual(request, db):
         return RedirectResponse(url="/dashboard", status_code=303)
     return RedirectResponse(url="/login", status_code=303)
 
 
 @app.get("/login")
-def login_form(request: Request):
-    if request.session.get("usuario_id"):
+def login_form(request: Request, db: Session = Depends(get_db)):
+    if get_usuario_actual(request, db):
         return RedirectResponse(url="/dashboard", status_code=303)
     return templates.TemplateResponse("login.html", {"request": request})
 
