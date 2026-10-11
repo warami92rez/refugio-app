@@ -30,11 +30,11 @@ Marca cada casilla cuando esté hecha y verificada.
 
 ## Etapa 0: cimientos (antes de tocar la lógica)
 
-- [ ] Pruebas con `pytest` y `TestClient` (base de datos de prueba en PostgreSQL, no SQLite, porque `sync_schema` usa SQL propio de Postgres).
-- [ ] Pruebas que fijan el comportamiento actual: login, muro, límite de 2 temas, permisos admin.
-- [ ] Alembic con una migración inicial que refleje el esquema actual. Reemplaza a `sync_schema`.
-- [ ] CI en GitHub Actions: instalar dependencias y correr las pruebas en cada PR.
-- [ ] Fijar la versión de Python (`runtime.txt`).
+- [x] Pruebas con `pytest` y `TestClient` contra PostgreSQL (no SQLite, para probar lo mismo que corre en producción).
+- [x] Pruebas que fijan el comportamiento actual: login, muro, límite de 2 temas, permisos admin (35 pruebas).
+- [x] Alembic con una migración inicial idempotente (funciona sobre base vacía, base creada por la versión anterior o base sin las columnas `rol`/`activo`). Reemplaza a `sync_schema`; el `Procfile` ejecuta `alembic upgrade head` al arrancar.
+- [x] CI en GitHub Actions: instalar dependencias y correr las pruebas en cada PR y en cada push a `main` (`.github/workflows/tests.yml`).
+- [x] Fijar la versión de Python (`.python-version`, 3.13).
 
 ## Etapa 1: arreglos de seguridad rápidos
 
