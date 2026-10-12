@@ -153,16 +153,29 @@ def login_submit(
 
 
 def sedes_sugeridas(db: Session) -> list[str]:
-    """Sedes escritas por al menos 2 personas distintas (evita mostrar texto suelto de uno solo)."""
+    """Sedes escritas por al menos 2 personas (evita mostrar texto suelto de uno solo).
+
+    Las variantes de mayusculas se agrupan y se sugiere la grafia mas usada; en empate
+    gana la primera en orden alfabetico. Se resuelve aqui y no en SQL para que el
+    resultado no dependa de la collation de la base de datos.
+    """
     filas = db.execute(
-        select(func.min(Usuario.sede))
+        select(Usuario.sede, func.count())
         .where(Usuario.sede.is_not(None))
-        .group_by(func.lower(Usuario.sede))
-        .having(func.count(Usuario.id) >= 2)
-        .order_by(func.lower(func.min(Usuario.sede)))
-        .limit(30)
+        .group_by(Usuario.sede)
+        .order_by(func.count().desc())
+        .limit(1000)
     ).all()
-    return [f[0] for f in filas]
+
+    grupos: dict[str, list[tuple[str, int]]] = {}
+    for sede, cantidad in filas:
+        grupos.setdefault(sede.casefold(), []).append((sede, cantidad))
+
+    sugeridas = []
+    for variantes in grupos.values():
+        if sum(c for _, c in variantes) >= 2:
+            sugeridas.append(min(variantes, key=lambda v: (-v[1], v[0]))[0])
+    return sorted(sugeridas, key=lambda s: (s.casefold(), s))[:30]
 
 
 def render_registro(request: Request, db: Session, valores=None, errores=None, status_code=200):

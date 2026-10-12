@@ -136,3 +136,30 @@ def test_sedes_sugeridas_solo_si_las_escribieron_dos_personas(client, crear_usua
     r = client.get("/registro")
     assert "Sede Norte" in r.text
     assert "privado" not in r.text
+
+
+def test_sede_sugerida_usa_la_grafia_mas_frecuente(client, crear_usuario):
+    for nombre in ("Uno", "Dos"):
+        crear_usuario(nombre, sede="sede norte")
+    crear_usuario("Tres", sede="Sede Norte")
+    html = client.get("/registro").text
+    assert '<option value="sede norte">' in html
+    assert '<option value="Sede Norte">' not in html
+
+
+def test_sede_sugerida_en_empate_es_siempre_la_misma(client, crear_usuario):
+    # Independiente de la collation de la base de datos (en GitHub no es la misma que en local).
+    crear_usuario("Uno", sede="sede norte")
+    crear_usuario("Dos", sede="Sede Norte")
+    html = client.get("/registro").text
+    assert '<option value="Sede Norte">' in html
+    assert html.count("<option") == 1
+
+
+def test_sedes_sugeridas_salen_ordenadas_y_sin_repetir(client, crear_usuario):
+    for i, sede in enumerate(["Zeta", "zeta", "alfa", "Alfa", "Medio", "medio"]):
+        crear_usuario(f"U{i}", sede=sede)
+    html = client.get("/registro").text
+    orden = [v for v in ("Alfa", "Medio", "Zeta") if f'<option value="{v}">' in html]
+    assert orden == ["Alfa", "Medio", "Zeta"]
+    assert html.index('value="Alfa"') < html.index('value="Medio"') < html.index('value="Zeta"')
