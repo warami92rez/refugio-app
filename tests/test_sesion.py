@@ -2,6 +2,7 @@
 from sqlalchemy import select
 
 from app.models import Usuario
+from tests.conftest import CLAVE
 
 
 def borrar_usuario(db, nombre):
@@ -31,12 +32,13 @@ def test_raiz_con_sesion_de_usuario_eliminado_va_a_login(login, db):
     assert (r.status_code, r.headers["location"]) == (303, "/login")
 
 
-def test_login_despues_de_ser_eliminado_permite_volver_a_entrar(login, db):
+def test_login_despues_de_ser_eliminado_permite_volver_a_entrar(login, db, crear_usuario):
     ana = login("Ana")
     borrar_usuario(db, "Ana")
 
     assert ana.get("/muro").headers["location"] == "/login"
-    r = ana.post("/login", data={"nombre": "Ana"})
+    crear_usuario("Ana")
+    r = ana.post("/login", data={"username": "ana", "password": CLAVE})
     assert (r.status_code, r.headers["location"]) == (303, "/dashboard")
     assert ana.get("/dashboard").status_code == 200
 

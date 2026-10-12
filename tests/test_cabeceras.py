@@ -1,5 +1,7 @@
 import pytest
 
+from tests.conftest import CLAVE
+
 CABECERAS_BASE = {
     "x-frame-options": "DENY",
     "x-content-type-options": "nosniff",
@@ -33,8 +35,9 @@ def test_hsts_no_se_envia_en_desarrollo(client):
     assert "strict-transport-security" not in client.get("/login").headers
 
 
-def test_la_cookie_de_sesion_es_httponly_y_lax_con_duracion(client):
-    r = client.post("/login", data={"nombre": "Ana"})
+def test_la_cookie_de_sesion_es_httponly_y_lax_con_duracion(client, crear_usuario):
+    crear_usuario("Ana")
+    r = client.post("/login", data={"username": "ana", "password": CLAVE})
     cookie = r.headers["set-cookie"].lower()
     assert "httponly" in cookie
     assert "samesite=lax" in cookie

@@ -64,7 +64,9 @@ CODIGO_PRODUCCION = """
 from fastapi.testclient import TestClient
 from app.main import app
 c = TestClient(app, base_url="https://testserver", follow_redirects=False)
-r = c.post("/login", data={"nombre": "Ana"})
+r = c.post("/registro", data={"nombre": "Ana", "edad": "20", "username": "ana",
+    "sede": "Centro", "password": "una-clave-larga-1", "password2": "una-clave-larga-1"})
+assert r.status_code == 303, r.status_code
 print("COOKIE:" + r.headers["set-cookie"].lower())
 print("HSTS:" + r.headers.get("strict-transport-security", "AUSENTE"))
 """

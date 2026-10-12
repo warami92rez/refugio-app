@@ -8,14 +8,22 @@ os.environ["DATABASE_URL"] = os.getenv(
 )
 os.environ["ENV"] = "test"
 os.environ["SECRET_KEY"] = "clave-solo-para-pruebas"
-os.environ["ADMIN_NAMES"] = "Directora"
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 from sqlalchemy import text  # noqa: E402
 
+from argon2 import PasswordHasher  # noqa: E402
+
+from app import seguridad  # noqa: E402
 from app.database import Base, SessionLocal, engine  # noqa: E402
 from app.main import app  # noqa: E402
+from app.models import Usuario  # noqa: E402
+
+# Hash barato: las pruebas crean muchos usuarios y no necesitan resistir ataques.
+seguridad.usar_hasher(PasswordHasher(time_cost=1, memory_cost=8, parallelism=1))
+
+CLAVE = "clave-de-prueba-1"
 
 
 def limpiar_base():
@@ -52,13 +60,36 @@ def nuevo_cliente():
     return TestClient(app, follow_redirects=False)
 
 
-@pytest.fixture
-def login():
-    """Devuelve una funcion que inicia sesion (creando la cuenta) con un cliente nuevo."""
+def username_de(nombre: str) -> str:
+    return nombre.lower().replace(" ", "_")
 
-    def _login(nombre: str) -> TestClient:
+
+@pytest.fixture
+def crear_usuario(db):
+    """Crea un usuario con contrasena directamente en la base."""
+
+    def _crear(nombre: str, rol: str = "usuario", username: str | None = None, **extra) -> Usuario:
+        datos = {"edad": 20, "sede": "Centro", "password_hash": seguridad.hash_password(CLAVE)}
+        datos.update(extra)
+        usuario = Usuario(nombre=nombre, username=username or username_de(nombre), rol=rol, **datos)
+        db.add(usuario)
+        db.commit()
+        db.refresh(usuario)
+        return usuario
+
+    return _crear
+
+
+@pytest.fixture
+def login(crear_usuario, db):
+    """Devuelve una funcion que crea el usuario (si no existe) e inicia sesion con un cliente nuevo."""
+
+    def _login(nombre: str, rol: str = "usuario") -> TestClient:
+        username = username_de(nombre)
+        if not db.query(Usuario).filter_by(username=username).first():
+            crear_usuario(nombre, rol=rol)
         c = nuevo_cliente()
-        r = c.post("/login", data={"nombre": nombre})
+        r = c.post("/login", data={"username": username, "password": CLAVE})
         assert r.status_code == 303 and r.headers["location"] == "/dashboard"
         return c
 

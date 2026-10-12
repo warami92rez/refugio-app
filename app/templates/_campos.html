@@ -1,0 +1,21 @@
+{% macro campo(etiqueta, nombre, tipo="text", valor="", error=None, autocomplete=None, ayuda=None, attrs={}) %}
+<div>
+    <label class="block text-sm font-medium text-gray-300 mb-2" for="{{ nombre }}">{{ etiqueta }}</label>
+    <input
+        type="{{ tipo }}"
+        id="{{ nombre }}"
+        name="{{ nombre }}"
+        value="{{ valor }}"
+        required
+        {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+        {% for clave, v in attrs.items() %}{{ clave }}="{{ v }}" {% endfor %}
+        {% if error %}aria-invalid="true" aria-describedby="{{ nombre }}-error"{% endif %}
+        class="w-full rounded-lg bg-black/40 border {{ 'border-red-500/60' if error else 'border-white/10' }} px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-refugio-accent"
+    />
+    {% if error %}
+    <p id="{{ nombre }}-error" class="text-red-400 text-xs mt-1">{{ error }}</p>
+    {% elif ayuda %}
+    <p class="text-xs text-gray-500 mt-1">{{ ayuda }}</p>
+    {% endif %}
+</div>
+{% endmacro %}
